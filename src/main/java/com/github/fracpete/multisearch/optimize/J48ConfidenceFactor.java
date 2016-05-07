@@ -14,32 +14,29 @@
  */
 
 /**
- * PLSFilterAndLinearRegression.java
- * Copyright (C) 2015 University of Waikato, Hamilton, NZ
+ * J48ConfidenceFactor.java
+ * Copyright (C) 2016 University of Waikato, Hamilton, NZ
  */
 
 package com.github.fracpete.multisearch.optimize;
 
 import com.github.fracpete.multisearch.ExampleHelper;
-import weka.classifiers.functions.LinearRegression;
-import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.MultiSearch;
 import weka.classifiers.meta.multisearch.DefaultEvaluationMetrics;
+import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.core.setupgenerator.AbstractParameter;
-import weka.core.setupgenerator.ListParameter;
 import weka.core.setupgenerator.MathParameter;
-import weka.filters.supervised.attribute.PLSFilter;
 
 /**
- * Optimizes the number of components of PLSFilter and the ridge
- * parameter of LinearRegression.
+ * Optimizes the confidence factor of the J48 classifier.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision$
  */
-public class PLSFilterAndLinearRegression {
+public class J48ConfidenceFactor {
 
   /**
    * The first parameter must be dataset,
@@ -51,7 +48,7 @@ public class PLSFilterAndLinearRegression {
    */
   public static void main(String[] args) throws Exception {
     if (args.length == 0) {
-      System.err.println("\nUsage: PLSFilterAndLinearRegression <dataset> [classindex]\n");
+      System.err.println("\nUsage: J48ConfidenceFactor <dataset> [classindex]\n");
       System.exit(1);
     }
 
@@ -59,36 +56,23 @@ public class PLSFilterAndLinearRegression {
     Instances data = ExampleHelper.loadData(args[0], (args.length > 1) ? args[1] : null);
 
     // configure classifier we want to optimize
-    PLSFilter pls = new PLSFilter();
-    LinearRegression lr = new LinearRegression();
-    FilteredClassifier fc = new FilteredClassifier();
-    fc.setClassifier(lr);
-    fc.setFilter(pls);
-    // required for Weka > 3.7.13
-    fc.setDoNotCheckForModifiedClassAttribute(true);
+    J48 j48 = new J48();
 
     // configure multisearch
-    // 1. number of components
-    ListParameter numComp = new ListParameter();
-    numComp.setProperty("filter.numComponents");
-    numComp.setList("2 5 7");
-    // 2. ridge
-    MathParameter ridge = new MathParameter();
-    ridge.setProperty("classifier.ridge");
-    ridge.setBase(10);
-    ridge.setMin(-5);
-    ridge.setMax(1);
-    ridge.setStep(1);
-    ridge.setExpression("pow(BASE,I)");
-    // assemble everything
+    MathParameter conf = new MathParameter();
+    conf.setProperty("confidenceFactor");
+    conf.setBase(10);
+    conf.setMin(0.05);
+    conf.setMax(0.75);
+    conf.setStep(0.05);
+    conf.setExpression("I");
     MultiSearch multi = new MultiSearch();
-    multi.setClassifier(fc);
+    multi.setClassifier(j48);
     multi.setSearchParameters(new AbstractParameter[]{
-      numComp,
-      ridge
+      conf
     });
     SelectedTag tag = new SelectedTag(
-      DefaultEvaluationMetrics.EVALUATION_RMSE,
+      DefaultEvaluationMetrics.EVALUATION_AUC,
       new DefaultEvaluationMetrics().getTags());
     multi.setEvaluation(tag);
 
@@ -99,6 +83,6 @@ public class PLSFilterAndLinearRegression {
     System.out.println("\nOptimizing...\n");
     multi.buildClassifier(data);
     System.out.println("Best setup:\n" + Utils.toCommandLine(multi.getBestClassifier()));
-    System.out.println("Best parameters: " + multi.getGenerator().evaluate(multi.getBestValues()));
+    System.out.println("Best parameter: " + multi.getGenerator().evaluate(multi.getBestValues()));
   }
 }
