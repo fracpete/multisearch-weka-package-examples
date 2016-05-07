@@ -42,10 +42,10 @@ public class J48ConfidenceFactor {
    * Outputs the commandlines.
    *
    * @param args	the commandline options
-   * @throws Exception	if optimization fails for some reason
+   * @throws Exception	if setup generator fails for some reason
    */
   public static void main(String[] args) throws Exception {
-    // configure classifier we want to optimize
+    // configure classifier we want to generate setups for
     J48 j48 = new J48();
 
     // configure generator

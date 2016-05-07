@@ -44,10 +44,10 @@ public class PLSFilterAndLinearRegression {
    * Outputs the commandlines.
    *
    * @param args	the commandline options
-   * @throws Exception	if optimization fails for some reason
+   * @throws Exception	if setup generator fails for some reason
    */
   public static void main(String[] args) throws Exception {
-    // configure classifier we want to optimize
+    // configure classifier we want to generate setups for
     PLSFilter pls = new PLSFilter();
     LinearRegression lr = new LinearRegression();
     FilteredClassifier fc = new FilteredClassifier();
