@@ -85,7 +85,7 @@
     <dependency>
       <groupId>com.github.fracpete</groupId>
       <artifactId>multisearch-weka-package</artifactId>
-      <version>2016.5.15</version>
+      <version>2016.6.6</version>
     </dependency>
 
     <dependency>
